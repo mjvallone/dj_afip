@@ -1,9 +1,12 @@
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+
 
 MY_CUIT='change-me'
 MY_PASSWORD = 'change-me'
+MY_SOCIAL_SERVICE = 'change-me'
 
 # set up webdriver (assuming you have installed ChromeDriver)
 driver = webdriver.Chrome()
@@ -29,15 +32,66 @@ search_button.send_keys("misssalud")
 time.sleep(2)
 misalud_button = driver.find_element(By.ID, "rbt-menu-item-0")
 misalud_button.click()
-time.sleep(2)
+time.sleep(5)
 
-## WIP no aparece el boton para generar la DJ, asi que a esperar  ##
-# dj_button = driver.find_element(By.XPATH, "//*[contains(text(), 'Declaración Jurada')]")
-# dj_button = driver.find_element(By.CSS_SELECTOR, 'div.col-xs-12')
-# dj_button.click()
+#get current window handle
+p = driver.current_window_handle
+
+#get first child window
+chwd = driver.window_handles
+
+for w in chwd:
+#switch focus to child window
+    if(w!=p):
+      driver.switch_to.window(w)
+print("Child window title: " + driver.title)
+
+links = driver.find_elements(By.TAG_NAME, 'a')
+for link in links:
+  # print(f'text: {link.text} - href: {link.get_attribute("href")} - link: {link.get_attribute("target")}')
+  if "Declaración Jurada" in link.text:
+    link.click()
+
 time.sleep(5)
-dj_button2 = driver.find_element(By.CSS_SELECTOR, 'div.col-xs-12').find_element(By.XPATH, "//span[contains(text(), 'Declaraciones Juradas')]")
-dj_button2.click()
+
+form = driver.find_element(By.NAME, "formAgregar")
+form.submit()
 time.sleep(5)
-# form = driver.find_element(By.name, "formAgregar")
-# form.submit()
+
+
+prepaga_btn = driver.find_element(By.ID, "btnEleccionOOSS")
+# FIXME por alguna razon al clickear este boton no abre el modal, ventana
+prepaga_btn.click()
+
+# modal = driver.find_element(By.ID, "modal-default")
+
+dropdown = driver.find_element(By.ID, "listOOSS")
+select = Select(dropdown)
+print(f"len(select.options): {len(select.options)}")
+for opt in select.options:
+  print(opt.text)
+# select.select_by_value("113366")
+time.sleep(10)
+
+close_btn = driver.find_element(By.ID, "btnModalCerrar")
+close_btn.click()
+
+# search_prepaga = driver.find_element(By.CLASS_NAME, "select2-search__field")
+# search_prepaga.send_keys(MY_SOCIAL_SERVICE)
+# search_prepaga.select_by_index(1)
+
+
+aceptadj_form = driver.find_element(By.NAME, "aceptadj")
+select = Select(aceptadj_form)
+select.select_by_value('1')
+
+aceptacruce_form = driver.find_element(By.NAME, "aceptacruce")
+select = Select(aceptacruce_form)
+select.select_by_value('1')
+time.sleep(5)
+
+# main_form = driver.find_element(By.ID, "formDj")
+# main_form.submit()
+# time.sleep(5)
+
+#TODO hacer captura de pantalla y mandar wp para chequear que se hizo?
