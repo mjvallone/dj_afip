@@ -15,7 +15,7 @@ Si usas Chrome, deberías instalar los drivers para poder correr Selenium acorde
 
 3. Instalar requerimientos de python
 
-        pip install requirements.txt
+        pip install -r requirements.txt
 
 4. Correr el script
 

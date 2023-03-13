@@ -3,10 +3,13 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
-
+########## CONFIGURAR ACA ########## 
 MY_CUIT='change-me'
 MY_PASSWORD = 'change-me'
-MY_SOCIAL_SERVICE = 'change-me'
+MY_SOCIAL_SERVICE = '' # Correr con este valor vacio para obtener el listado de OSs por consola!
+# MY_SOCIAL_SERVICE = '113366' #(omint)
+SCREENSHOT_PATH = '/home/change-user/Desktop'
+####################################
 
 # set up webdriver (assuming you have installed ChromeDriver)
 driver = webdriver.Chrome()
@@ -44,11 +47,9 @@ for w in chwd:
 #switch focus to child window
     if(w!=p):
       driver.switch_to.window(w)
-print("Child window title: " + driver.title)
 
 links = driver.find_elements(By.TAG_NAME, 'a')
 for link in links:
-  # print(f'text: {link.text} - href: {link.get_attribute("href")} - link: {link.get_attribute("target")}')
   if "Declaración Jurada" in link.text:
     link.click()
 
@@ -60,38 +61,51 @@ time.sleep(5)
 
 
 prepaga_btn = driver.find_element(By.ID, "btnEleccionOOSS")
-# FIXME por alguna razon al clickear este boton no abre el modal, ventana
 prepaga_btn.click()
 
-# modal = driver.find_element(By.ID, "modal-default")
+time.sleep(5)
 
-dropdown = driver.find_element(By.ID, "listOOSS")
-select = Select(dropdown)
-print(f"len(select.options): {len(select.options)}")
-for opt in select.options:
-  print(opt.text)
-# select.select_by_value("113366")
-time.sleep(10)
+listOOSS = Select(driver.find_element(By.ID, "listOOSS"))
 
-close_btn = driver.find_element(By.ID, "btnModalCerrar")
-close_btn.click()
+print(f"Total de opciones de prepaga: {len(listOOSS.options)}")
+for opt in listOOSS.options:
+  value = opt.get_attribute("value")
+  if MY_SOCIAL_SERVICE == '':
+    print(f"valor: {value}  ||  texto: {opt.text}")
+  elif MY_SOCIAL_SERVICE == value:
+    print(f"SELECCIONADA: {value}  ||  {opt.text}")
 
-# search_prepaga = driver.find_element(By.CLASS_NAME, "select2-search__field")
-# search_prepaga.send_keys(MY_SOCIAL_SERVICE)
-# search_prepaga.select_by_index(1)
+# MUERE ACA SI NO HAY OS CONFIGURADA!
+if MY_SOCIAL_SERVICE == '':
+  print("Buscar en el listado y configurar 'MY_SOCIAL_SERVICE' con el valor que corresponda!")
+  exit()
 
+listOOSS.select_by_value(MY_SOCIAL_SERVICE)
+time.sleep(2)
+
+driver.find_element(By.ID, "btnElegirOOSS").click()
+time.sleep(2)
 
 aceptadj_form = driver.find_element(By.NAME, "aceptadj")
 select = Select(aceptadj_form)
 select.select_by_value('1')
+time.sleep(2)
 
 aceptacruce_form = driver.find_element(By.NAME, "aceptacruce")
 select = Select(aceptacruce_form)
 select.select_by_value('1')
+time.sleep(2)
+
+aceptar_button = driver.find_element(By.NAME, "aceptar")
+aceptar_button.click()
+print("Esperando 10 segundos para aceptar y confirmar la DJ..")
+time.sleep(10)
+
+confirmar_button = driver.find_element(By.NAME, "aceptar")
+#TODO Descomentar la linea debajo para confirmarrrrrrrrrr!!
+# aceptar_button.click()
 time.sleep(5)
 
-# main_form = driver.find_element(By.ID, "formDj")
-# main_form.submit()
-# time.sleep(5)
-
-#TODO hacer captura de pantalla y mandar wp para chequear que se hizo?
+#TODO mejorar captura de pantalla full-screen y mandar wp para chequear que se hizo?
+driver.save_screenshot(SCREENSHOT_PATH+"/AFIP-OS-DJ.png")
+print("Screenshot guardado en: ", SCREENSHOT_PATH+"/AFIP-OS-DJ.png")
