@@ -2,6 +2,7 @@
 Este código fue hecho para automatizar la generación de la declaración jurada mensual que se debe hacer en la AFIP para que no te aumenten el valor de la prepaga si tenés ingresos menores a un cierto monto.
 
 ## Para correrlo
+Antes que nada recuerda configurar tus datos en settings.py
 
 Si usas Chrome, deberías instalar los drivers para poder correr Selenium acordes a tu versión de navegador (versiones de chromedriver: https://chromedriver.chromium.org/downloads)
 

@@ -5,15 +5,7 @@ import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-
-########## CONFIGURAR ACA ##########
-# Recordar cambiar cada change-me que hay en el codigo!
-MY_CUIT='change-me'
-MY_PASSWORD = 'change-me'
-MY_SOCIAL_SERVICE_NAME = 'change-me' # Completar para que el script pueda sugerir posibles codigos de OS
-# MY_SOCIAL_SERVICE_ID = '' # Correr con este valor vacio para obtener el listado de OSs por consola!
-SCREENSHOT_PATH = '/home/change-me/Desktop'
-####################################
+import settings
 
 # set up webdriver (assuming you have installed ChromeDriver)
 driver = webdriver.Chrome()
@@ -21,14 +13,14 @@ driver.get("https://auth.afip.gob.ar/contribuyente_/login.xhtml")
 
 # completamos CUIT
 cuil_input = driver.find_element(By.ID, "F1:username")
-cuil_input.send_keys(MY_CUIT)
+cuil_input.send_keys(settings.MY_CUIT)
 submit_button = driver.find_element(By.ID, "F1:btnSiguiente")
 submit_button.click()
 time.sleep(5)
 
 # completamos PASSWORD
 password_input = driver.find_element(By.ID, "F1:password")
-password_input.send_keys(MY_PASSWORD)
+password_input.send_keys(settings.MY_PASSWORD)
 submit_button = driver.find_element(By.ID, "F1:btnIngresar")
 submit_button.click()
 time.sleep(5)
@@ -72,18 +64,18 @@ time.sleep(5)
 listOOSS = Select(driver.find_element(By.ID, "listOOSS"))
 
 print(f"Total de opciones de prepaga: {len(listOOSS.options)}")
-if MY_SOCIAL_SERVICE_ID == '':
+if settings.MY_SOCIAL_SERVICE_ID == '':
   with open('obras_sociales.csv', mode='w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(['codigo', 'nombre_obra_social']) #header row
     
     for opt in listOOSS.options:
       value = opt.get_attribute("value")
-      if MY_SOCIAL_SERVICE_NAME in opt.text.lower():
+      if settings.MY_SOCIAL_SERVICE_NAME in opt.text.lower():
         print(f"Tu posible obra social podria ser: {value} - {opt.text}")
-      if MY_SOCIAL_SERVICE_ID == '':
+      if settings.MY_SOCIAL_SERVICE_ID == '':
         writer.writerow([value, opt.text])
-      elif MY_SOCIAL_SERVICE_ID == value:
+      elif settings.MY_SOCIAL_SERVICE_ID == value:
         print(f"SELECCIONADA: {value}  ||  {opt.text}")
 
   # MUERE ACA SI NO HAY OS CONFIGURADA!
@@ -91,7 +83,7 @@ if MY_SOCIAL_SERVICE_ID == '':
   print("Buscar en el archivo el codigo de la obra social que te corresponde y configurar 'MY_SOCIAL_SERVICE_ID' con dicho valor!")
   exit()
 
-listOOSS.select_by_value(MY_SOCIAL_SERVICE_ID)
+listOOSS.select_by_value(settings.MY_SOCIAL_SERVICE_ID)
 time.sleep(2)
 
 driver.find_element(By.ID, "btnElegirOOSS").click()
@@ -121,5 +113,5 @@ time.sleep(2)
 
 now = datetime.datetime.now()
 file_date = f"{now.month}-{now.year}"
-driver.save_screenshot(f"{SCREENSHOT_PATH}/AFIP-OS-DJ-{file_date}.png")
-print("Screenshot guardado en: ", f"{SCREENSHOT_PATH}/AFIP-OS-DJ-{file_date}.png")
+driver.save_screenshot(f"{settings.SCREENSHOT_PATH}/AFIP-OS-DJ-{file_date}.png")
+print("Screenshot guardado en: ", f"{settings.SCREENSHOT_PATH}/AFIP-OS-DJ-{file_date}.png")
